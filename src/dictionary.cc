@@ -153,18 +153,14 @@ void Dictionary::computeSubwords(const std::string& word,
                                std::vector<int32_t>& ngrams,
                                std::vector<std::string>& substrings) const {
   for (size_t i = 0; i < word.size(); i++) {
-    std::string ngram;
     if ((word[i] & 0xC0) == 0x80) continue;
-    for (size_t j = i, n = 1; j < word.size() && n <= args_->maxn; n++) {
-      ngram.push_back(word[j++]);
-      while (j < word.size() && (word[j] & 0xC0) == 0x80) {
-        ngram.push_back(word[j++]);
-      }
-      if (n >= args_->minn && !(n == 1 && (i == 0 || j == word.size()))) {
-        int32_t h = hash(ngram) % args_->bucket;
-        ngrams.push_back(nwords_ + h);
-        substrings.push_back(ngram);
-      }
+    for (size_t j = i + 1; j < word.size(); j++) {
+      std::string ngram;
+      ngram.push_back(word[i]);
+      ngram.push_back(word[j]);
+      int32_t h = hash(ngram) % args_->bucket;
+      ngrams.push_back(nwords_ + h);
+      substrings.push_back(ngram);
     }
   }
 }
@@ -172,17 +168,13 @@ void Dictionary::computeSubwords(const std::string& word,
 void Dictionary::computeSubwords(const std::string& word,
                                std::vector<int32_t>& ngrams) const {
   for (size_t i = 0; i < word.size(); i++) {
-    std::string ngram;
     if ((word[i] & 0xC0) == 0x80) continue;
-    for (size_t j = i, n = 1; j < word.size() && n <= args_->maxn; n++) {
-      ngram.push_back(word[j++]);
-      while (j < word.size() && (word[j] & 0xC0) == 0x80) {
-        ngram.push_back(word[j++]);
-      }
-      if (n >= args_->minn && !(n == 1 && (i == 0 || j == word.size()))) {
-        int32_t h = hash(ngram) % args_->bucket;
-        pushHash(ngrams, h);
-      }
+    for (size_t j = i + 1; j < word.size(); j++) {
+      std::string ngram;
+      ngram.push_back(word[i]);
+      ngram.push_back(word[j]);
+      int32_t h = hash(ngram) % args_->bucket;
+      pushHash(ngrams, h);
     }
   }
 }
